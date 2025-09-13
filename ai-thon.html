@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Adaptive Learning Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: white;
+            padding: 0 10px;
+        }
+        .header h1 {
+            font-size: 2rem;
+        }
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 10px;
+        }
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .btn {
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            margin: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            left: 20px;
+            padding: 15px 20px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateY(-100px);
+            transition: transform 0.3s ease;
+            text-align: center;
+            z-index: 1000;
+        }
+        .notification.show {
+            transform: translateY(0);
+        }
+
+        /* ✅ Responsive button classes */
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            min-width: 80px;
+        }
+        .btn-medium {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            min-width: 100px;
+        }
+        .btn-large {
+            padding: 12px 20px;
+            font-size: 1rem;
+            min-width: 120px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Adaptive Learning Management System</h1>
+            <p>Your Intelligent Study Companion</p>
+        </div>
+        <div class="nav-tabs">
+            <button class="btn tab-button active" data-tab="upload">📁 Document Processing</button>
+            <button class="btn tab-button" data-tab="assessment">📝 Assessment Generation</button>
+            <button class="btn tab-button" data-tab="analytics">📊 Performance Analytics</button>
+            <button class="btn tab-button" data-tab="recommendations">🎯 Study Recommendations</button>
+        </div>
+
+        <div id="upload" class="tab-content active">
+            <h2>📁 Document Processing</h2>
+            <p>Upload your documents to process content here.</p>
+        </div>
+        <div id="assessment" class="tab-content">
+            <h2>📝 Generate Assessments</h2>
+            <div class="question-type-selector">
+                <label>Question Type:</label>
+                <select id="questionType">
+                    <option value="multiple-choice">Multiple Choice</option>
+                    <option value="true-false">True/False</option>
+                    <option value="short-answer">Short Answer</option>
+                    <option value="essay">Essay</option>
+                </select>
+            </div>
+            <div id="questionForm"></div>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="addQuestion">➕ Add Question</button>
+                <button class="btn btn-primary" id="generateAssessment">🤖 Auto-Generate</button>
+            </div>
+            <div id="assessmentPreview"></div>
+        </div>
+        <div id="analytics" class="tab-content">
+            <h2>📊 Performance Analytics</h2>
+            <p>View your performance data here.</p>
+        </div>
+        <div id="recommendations" class="tab-content">
+            <h2>🎯 Study Recommendations</h2>
+            <p>Get personalized study tips here.</p>
+        </div>
+    </div>
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Tab switching logic
+        const tabs = document.querySelectorAll('.tab-button');
+        const contents = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                contents.forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
+            });
+        });
+
+        // Notification logic
+        function showNotification(message, type = 'success') {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.className = 'notification show';
+            notif.style.background = type === 'error'
+                ? 'linear-gradient(45deg, #dc3545, #c82333)'
+                : 'linear-gradient(45deg, #28a745, #20c997)';
+            setTimeout(() => {
+                notif.className = 'notification';
+            }, 3000);
+        }
+
+        // Assessment logic
+        const questionType = document.getElementById('questionType');
+        const questionForm = document.getElementById('questionForm');
+        const addQuestion = document.getElementById('addQuestion');
+        const generateAssessment = document.getElementById('generateAssessment');
+        const assessmentPreview = document.getElementById('assessmentPreview');
+
+        let questions = [];
+
+        function renderForm() {
+            const type = questionType.value;
+            questionForm.innerHTML = `
+                <input type="text" id="questionText" placeholder="Enter your question here..." />
+            `;
+
+            if (type === 'multiple-choice') {
+                for (let i = 1; i <= 4; i++) {
+                    questionForm.innerHTML += `
+                        <input type="text" id="option${i}" placeholder="Option ${i}" />
+                    `;
+                }
+                questionForm.innerHTML += `<input type="text" id="correctAnswer" placeholder="Correct Answer" />`;
+            } else if (type === 'true-false') {
+                questionForm.innerHTML += `
+                    <div>
+                        <label><input type="radio" name="tfAnswer" value="True"> True</label>
+                        <label><input type="radio" name="tfAnswer" value="False"> False</label>
+                    </div>`;
+            } else {
+                questionForm.innerHTML += `<input type="text" id="correctAnswer" placeholder="Correct Answer" />`;
+            }
+
+            questionForm.innerHTML += `<textarea id="explanation" placeholder="Explanation (optional)" rows="3"></textarea>`;
+        }
+
+        function addQuestionHandler() {
+            const type = questionType.value;
+            const text = document.getElementById('questionText').value.trim();
+            if (!text) {
+                showNotification('Enter question text!', 'error');
+                return;
+            }
+
+            let question = { type, text, explanation: document.getElementById('explanation').value.trim() };
+
+            if (type === 'multiple-choice') {
+                question.options = [];
+                for (let i = 1; i <= 4; i++) {
+                    const option = document.getElementById(`option${i}`).value.trim();
+                    if (!option) {
+                        showNotification(`Fill option ${i}`, 'error');
+                        return;
+                    }
+                    question.options.push(option);
+                }
+                question.correctAnswer = document.getElementById('correctAnswer').value.trim();
+                if (!question.correctAnswer) {
+                    showNotification('Enter correct answer!', 'error');
+                    return;
+                }
+            } else if (type === 'true-false') {
+                const tf = document.querySelector('input[name="tfAnswer"]:checked');
+                if (!tf) {
+                    showNotification('Select True or False!', 'error');
+                    return;
+                }
+                question.correctAnswer = tf.value;
+            } else {
+                question.correctAnswer = document.getElementById('correctAnswer').value.trim();
+                if (!question.correctAnswer) {
+                    showNotification('Enter correct answer!', 'error');
+                    return;
+                }
+            }
+
+            questions.push(question);
+            renderPreview();
+            renderForm();
+        }
+
+        function generateAssessmentHandler() {
+            showNotification('Auto-generation is placeholder!');
+        }
+
+        function renderPreview() {
+            assessmentPreview.innerHTML = '';
+            questions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.innerHTML = `
+                    <strong>Q${index + 1}: ${q.text}</strong><br>
+                    ${q.options ? '<ul>' + q.options.map(o => `<li>${o}</li>`).join('') + '</ul>' : ''}
+                    <p><strong>Answer:</strong> ${q.correctAnswer}</p>
+                    ${q.explanation ? `<p><em>${q.explanation}</em></p>` : ''}
+                `;
+                assessmentPreview.appendChild(card);
+            });
+        }
+
+        questionType.addEventListener('change', renderForm);
+        addQuestion.addEventListener('click', addQuestionHandler);
+        generateAssessment.addEventListener('click', generateAssessmentHandler);
+
+        renderForm();
+
+        // ✅ JavaScript for Responsive Buttons (class-based)
+        function adjustButtonStyles() {
+            const allButtons = document.querySelectorAll('.btn');
+            const width = window.innerWidth;
+
+            allButtons.forEach(btn => {
+                btn.classList.remove('btn-small', 'btn-medium', 'btn-large');
+                if (width < 500) {
+                    btn.classList.add('btn-small');
+                } else if (width < 768) {
+                    btn.classList.add('btn-medium');
+                } else {
+                    btn.classList.add('btn-large');
+                }
+            });
+        }
+
+        window.addEventListener('resize', adjustButtonStyles);
+        window.addEventListener('load', adjustButtonStyles);
+    </script>
+</body>
+</html>
+
